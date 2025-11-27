@@ -361,10 +361,30 @@
             if (miniMapElement) {
                 const miniMap = L.map('miniMap').setView([-6.7289, 110.7485], 13);
                 
-                const baseLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                // Base Layers
+                const googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
                     maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
                     attribution: '&copy; Google Maps'
                 }).addTo(miniMap);
+
+                const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
+                });
+
+                const googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
+                });
+
+                const googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                    attribution: '&copy; Google Maps'
+                });
 
                 // Layer Groups
                 const boundariesLayer = L.geoJSON(null, {
@@ -483,13 +503,20 @@
                 });
 
                 // Layer Control
+                const baseLayers = {
+                    "Google Streets": googleStreets,
+                    "Google Hybrid": googleHybrid,
+                    "Google Satellite": googleSatellite,
+                    "Google Terrain": googleTerrain
+                };
+
                 const overlays = {
                     "Batas Wilayah": boundariesLayer,
                     "Infrastruktur": infrastructuresLayer,
                     "Penggunaan Lahan": landUsesLayer,
                     "Lokasi": placesLayer
                 };
-                L.control.layers(null, overlays).addTo(miniMap);
+                L.control.layers(baseLayers, overlays).addTo(miniMap);
             }
         });
     </script>

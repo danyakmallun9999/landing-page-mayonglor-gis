@@ -1,486 +1,622 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Jelajahi Peta - Desa Mayong Lor</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Styles -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
-        #map { height: 100vh; width: 100%; }
-        .sidebar {
-            width: 400px;
-            max-height: 100vh;
-            overflow-y: auto;
+        #map { height: 100vh; width: 100%; z-index: 0; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .feature-card {
-            transition: all 0.2s;
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 999px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Leaflet Customization */
+        .leaflet-control-layers {
+            background: rgba(15, 23, 42, 0.8) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border-radius: 12px !important;
         }
-        .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .leaflet-control-zoom {
+            border: none !important;
+        }
+        .leaflet-control-zoom a {
+            background: rgba(15, 23, 42, 0.8) !important;
+            backdrop-filter: blur(8px);
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+        .leaflet-control-zoom a:first-child {
+            border-top-left-radius: 8px !important;
+            border-top-right-radius: 8px !important;
+        }
+        .leaflet-control-zoom a:last-child {
+            border-bottom-left-radius: 8px !important;
+            border-bottom-right-radius: 8px !important;
         }
         .leaflet-popup-content-wrapper {
-            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            color: white;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                max-height: 50vh;
-            }
+        .leaflet-popup-tip {
+            background: rgba(15, 23, 42, 0.95);
         }
+        .leaflet-container a.leaflet-popup-close-button {
+            color: white;
+        }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body>
-    <div x-data="mapExplorer()" class="flex flex-col md:flex-row h-screen">
-        <!-- Sidebar -->
-        <div class="sidebar bg-white shadow-xl z-10 flex flex-col">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-green-600 to-green-700 text-white p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h1 class="text-2xl font-bold">Peta Desa Mayong Lor</h1>
-                    <a href="{{ route('welcome') }}" class="text-white hover:text-gray-200">
-                        <i class="fa-solid fa-arrow-left text-xl"></i>
-                    </a>
-                </div>
-                <p class="text-sm text-green-100">Jelajahi lokasi, infrastruktur, dan wilayah desa</p>
-            </div>
+<body class="antialiased font-sans text-slate-200 bg-slate-950 overflow-hidden">
 
-            <!-- Search -->
-            <div class="p-4 border-b">
-                <div class="relative">
+    <div x-data="mapExplorer()" class="relative h-screen w-full flex">
+        
+        <!-- Map Container -->
+        <div class="absolute inset-0 z-0">
+            <div id="map"></div>
+        </div>
+
+        <!-- Floating Sidebar -->
+        <div class="absolute top-0 left-0 h-full w-full md:w-[420px] z-10 p-4 md:p-6 pointer-events-none flex flex-col">
+            <!-- Header & Search -->
+            <div class="glass-panel rounded-3xl p-5 shadow-2xl shadow-black/50 pointer-events-auto flex flex-col max-h-full">
+                
+                <!-- Top Bar -->
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('welcome') }}" class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition text-white">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h1 class="text-lg font-bold text-white leading-tight">Peta Desa Mayong Lor</h1>
+                            <p class="text-xs text-slate-400">Eksplorasi Data Spasial</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button @click="resetView()" class="p-2 text-slate-400 hover:text-white transition" title="Reset View">
+                            <i class="fa-solid fa-compress"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="relative mb-6">
                     <input 
                         type="text" 
                         x-model="searchQuery"
                         @input="performSearch()"
-                        placeholder="Cari lokasi, tempat, atau fasilitas..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="Cari lokasi, kategori, atau infrastruktur..."
+                        class="w-full rounded-xl bg-slate-900/50 border border-white/10 py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"
                     >
-                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                </div>
-            </div>
-
-            <!-- Layer Controls -->
-            <div class="p-4 border-b bg-gray-50">
-                <h3 class="text-sm font-semibold text-gray-700 mb-3">Layer Peta</h3>
-                <div class="space-y-2">
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="showPlaces" @change="updateLayers()" class="mr-2">
-                        <span class="text-sm text-gray-700">Titik Lokasi</span>
-                        <span class="ml-auto text-xs text-gray-500">({{ $places->count() }})</span>
-                    </label>
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="showBoundaries" @change="updateLayers()" class="mr-2">
-                        <span class="text-sm text-gray-700">Batas Wilayah</span>
-                        <span class="ml-auto text-xs text-gray-500">({{ $boundaries->count() }})</span>
-                    </label>
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="showInfrastructures" @change="updateLayers()" class="mr-2">
-                        <span class="text-sm text-gray-700">Infrastruktur</span>
-                        <span class="ml-auto text-xs text-gray-500">({{ $infrastructures->count() }})</span>
-                    </label>
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="showLandUses" @change="updateLayers()" class="mr-2">
-                        <span class="text-sm text-gray-700">Penggunaan Lahan</span>
-                        <span class="ml-auto text-xs text-gray-500">({{ $landUses->count() }})</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Results/Features List -->
-            <div class="flex-1 overflow-y-auto p-4">
-                <h3 class="text-sm font-semibold text-gray-700 mb-3">
-                    <span x-text="selectedFeature ? 'Detail' : (searchQuery ? 'Hasil Pencarian' : 'Daftar Lokasi')"></span>
-                </h3>
-
-                <!-- Selected Feature Detail -->
-                <div x-show="selectedFeature" x-cloak class="mb-4">
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                        <div class="flex items-start justify-between mb-3">
-                            <h4 class="text-lg font-bold text-gray-900" x-text="selectedFeature.name"></h4>
-                            <button @click="selectedFeature = null" class="text-gray-400 hover:text-gray-600">
-                                <i class="fa-solid fa-times"></i>
+                    <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    
+                    <!-- Search Results Dropdown -->
+                    <div x-show="searchQuery.length > 1 && searchResults.length > 0" 
+                         x-transition
+                         class="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 max-h-60 overflow-y-auto custom-scroll">
+                        <template x-for="result in searchResults" :key="result.id">
+                            <button @click="selectFeature(result)" class="w-full text-left px-4 py-3 hover:bg-white/5 border-b border-white/5 last:border-0 transition flex items-center gap-3">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                    <i class="fa-solid fa-location-dot text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-white" x-text="result.name"></p>
+                                    <p class="text-xs text-slate-400" x-text="result.type || 'Lokasi'"></p>
+                                </div>
                             </button>
-                        </div>
-                        <div class="space-y-2 text-sm">
-                            <template x-if="selectedFeature.type">
-                                <p class="text-gray-600">
-                                    <span class="font-semibold">Tipe:</span> 
-                                    <span x-text="selectedFeature.type"></span>
-                                </p>
-                            </template>
-                            <template x-if="selectedFeature.category">
-                                <p class="text-gray-600">
-                                    <span class="font-semibold">Kategori:</span> 
-                                    <span x-text="selectedFeature.category.name"></span>
-                                </p>
-                            </template>
-                            <template x-if="selectedFeature.area_hectares">
-                                <p class="text-gray-600">
-                                    <span class="font-semibold">Luas:</span> 
-                                    <span x-text="selectedFeature.area_hectares + ' ha'"></span>
-                                </p>
-                            </template>
-                            <template x-if="selectedFeature.length_meters">
-                                <p class="text-gray-600">
-                                    <span class="font-semibold">Panjang:</span> 
-                                    <span x-text="selectedFeature.length_meters + ' m'"></span>
-                                </p>
-                            </template>
-                            <template x-if="selectedFeature.description">
-                                <p class="text-gray-600 mt-2" x-text="selectedFeature.description"></p>
-                            </template>
-                            <template x-if="selectedFeature.image_url">
-                                <img :src="selectedFeature.image_url" :alt="selectedFeature.name" class="w-full h-48 object-cover rounded-lg mt-3">
-                            </template>
-                        </div>
+                        </template>
                     </div>
                 </div>
 
-                <!-- Search Results -->
-                <div x-show="!selectedFeature && searchResults.length > 0" x-cloak class="space-y-3">
-                    <template x-for="result in searchResults" :key="result.id">
-                        <div 
-                            @click="selectFeature(result)"
-                            class="feature-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-500"
-                        >
-                            <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-12 h-12 rounded-lg flex items-center justify-center" 
-                                         :style="'background-color: ' + (result.category?.color || '#6b7280') + '20'">
-                                        <i :class="result.category?.icon_class || 'fa-solid fa-map-marker-alt'" 
-                                           :style="'color: ' + (result.category?.color || '#6b7280')"></i>
+                <!-- Filter Tabs -->
+                <div class="flex p-1 bg-slate-900/50 rounded-xl mb-4 border border-white/5">
+                    <button @click="activeTab = 'layers'" :class="activeTab === 'layers' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 text-xs font-semibold rounded-lg transition">Layers</button>
+                    <button @click="activeTab = 'places'" :class="activeTab === 'places' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 text-xs font-semibold rounded-lg transition">Lokasi</button>
+                    <button @click="activeTab = 'info'" :class="activeTab === 'info' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'" class="flex-1 py-2 text-xs font-semibold rounded-lg transition">Info</button>
+                </div>
+
+                <!-- Content Area -->
+                <div class="flex-1 overflow-y-auto custom-scroll pr-2 -mr-2">
+                    
+                    <!-- Layers Tab -->
+                    <div x-show="activeTab === 'layers'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+                        <div class="space-y-4">
+                            <!-- Main Toggles -->
+                            <div class="space-y-2">
+                                <label class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition cursor-pointer group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                                            <i class="fa-solid fa-map"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-200 group-hover:text-white">Batas Wilayah</span>
+                                    </div>
+                                    <input type="checkbox" x-model="showBoundaries" @change="updateLayers()" class="rounded border-white/20 bg-white/10 text-blue-500 focus:ring-offset-slate-900">
+                                </label>
+
+                                <label class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition cursor-pointer group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
+                                            <i class="fa-solid fa-road"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-200 group-hover:text-white">Infrastruktur</span>
+                                    </div>
+                                    <input type="checkbox" x-model="showInfrastructures" @change="updateLayers()" class="rounded border-white/20 bg-white/10 text-blue-500 focus:ring-offset-slate-900">
+                                </label>
+
+                                <label class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition cursor-pointer group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                                            <i class="fa-solid fa-seedling"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-200 group-hover:text-white">Penggunaan Lahan</span>
+                                    </div>
+                                    <input type="checkbox" x-model="showLandUses" @change="updateLayers()" class="rounded border-white/20 bg-white/10 text-blue-500 focus:ring-offset-slate-900">
+                                </label>
+                            </div>
+
+                            <div class="h-px bg-white/10 my-4"></div>
+
+                            <!-- Categories Filter -->
+                            <div>
+                                <h3 class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-3">Filter Kategori Lokasi</h3>
+                                <div class="space-y-2">
+                                    <template x-for="category in categories" :key="category.id">
+                                        <label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/5 transition cursor-pointer">
+                                            <input type="checkbox" :value="category.id" x-model="selectedCategories" @change="updateMapMarkers()" class="rounded border-white/20 bg-white/10 text-blue-500 focus:ring-offset-slate-900">
+                                            <span class="w-2 h-2 rounded-full" :style="`background-color: ${category.color}`"></span>
+                                            <span class="text-sm text-slate-300 flex-1" x-text="category.name"></span>
+                                            <span class="text-xs bg-white/10 px-2 py-0.5 rounded-full text-slate-400" x-text="category.places_count"></span>
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Places Tab -->
+                    <div x-show="activeTab === 'places'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+                        <div class="space-y-3">
+                            <template x-for="place in visiblePlaces" :key="place.id">
+                                <div @click="selectPlace(place)" class="group bg-white/5 border border-white/5 rounded-xl p-3 hover:bg-white/10 hover:border-white/20 transition cursor-pointer">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <template x-if="place.image_path">
+                                                <img :src="'{{ url('/') }}/' + place.image_path" class="w-12 h-12 rounded-lg object-cover bg-slate-800">
+                                            </template>
+                                            <template x-if="!place.image_path">
+                                                <div class="w-12 h-12 rounded-lg flex items-center justify-center text-lg" :style="`background-color: ${place.category.color}20; color: ${place.category.color}`">
+                                                    <i :class="place.category.icon_class || 'fa-solid fa-map-marker-alt'"></i>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition truncate" x-text="place.name"></h4>
+                                            <p class="text-xs text-slate-400 mt-0.5" x-text="place.category.name"></p>
+                                            <p class="text-xs text-slate-500 mt-1 line-clamp-2" x-text="place.description"></p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-semibold text-gray-900" x-text="result.name"></h4>
-                                    <p class="text-xs text-gray-500 mt-1" x-text="result.category?.name || result.type || ''"></p>
-                                    <p class="text-xs text-gray-400 mt-1 line-clamp-2" x-text="result.description || ''"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Places List -->
-                <div x-show="!selectedFeature && searchResults.length === 0 && !searchQuery" class="space-y-3">
-                    @foreach($places as $place)
-                    <div 
-                        @click="selectPlace(@js($place))"
-                        class="feature-card bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-500"
-                    >
-                        <div class="flex items-start space-x-3">
-                            @if($place->image_path)
-                            <img src="{{ asset($place->image_path) }}" alt="{{ $place->name }}" class="w-12 h-12 rounded-lg object-cover">
-                            @else
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: {{ $place->category->color }}20">
-                                <i class="{{ $place->category->icon_class ?? 'fa-solid fa-map-marker-alt' }}" style="color: {{ $place->category->color }}"></i>
-                            </div>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-sm font-semibold text-gray-900">{{ $place->name }}</h4>
-                                <p class="text-xs text-gray-500 mt-1">{{ $place->category->name }}</p>
-                                <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ $place->description }}</p>
+                            </template>
+                            <div x-show="visiblePlaces.length === 0" class="text-center py-8 text-slate-500">
+                                <p>Tidak ada lokasi yang sesuai filter.</p>
                             </div>
                         </div>
                     </div>
-                    @endforeach
-                </div>
 
-                <!-- No Results -->
-                <div x-show="!selectedFeature && searchResults.length === 0 && searchQuery" x-cloak class="text-center py-8 text-gray-500">
-                    <i class="fa-solid fa-search text-4xl mb-2"></i>
-                    <p>Tidak ada hasil ditemukan</p>
+                    <!-- Info Tab -->
+                    <div x-show="activeTab === 'info'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+                        <div class="space-y-6">
+                            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                                <h3 class="text-sm font-bold text-blue-400 mb-2">Tentang Peta Ini</h3>
+                                <p class="text-sm text-slate-300 leading-relaxed">
+                                    Peta digital Desa Mayong Lor menyajikan data geospasial yang terintegrasi, mencakup batas wilayah, infrastruktur, penggunaan lahan, dan fasilitas publik.
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider">Total Lokasi</p>
+                                    <p class="text-2xl font-bold text-white mt-1">{{ $places->count() }}</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider">Infrastruktur</p>
+                                    <p class="text-2xl font-bold text-white mt-1">{{ $infrastructures->count() }}</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider">Wilayah</p>
+                                    <p class="text-2xl font-bold text-white mt-1">{{ $boundaries->count() }}</p>
+                                </div>
+                                <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                    <p class="text-xs text-slate-500 uppercase tracking-wider">Lahan</p>
+                                    <p class="text-2xl font-bold text-white mt-1">{{ $landUses->count() }}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Legenda</h4>
+                                <div class="space-y-2 text-sm text-slate-300">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                                        <span>Batas Wilayah (Polygon)</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                                        <span>Sungai / Irigasi (Line)</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-slate-500"></span>
+                                        <span>Jalan (Line)</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                        <span>Penggunaan Lahan (Polygon)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
 
-        <!-- Map -->
-        <div class="flex-1 relative">
-            <div id="map"></div>
+        <!-- Detail Panel (Slide Over) -->
+        <div x-show="selectedFeature" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full"
+             class="absolute top-0 right-0 h-full w-full md:w-[400px] z-20 p-4 md:p-6 pointer-events-none flex flex-col"
+             x-cloak>
+            
+            <div class="glass-panel rounded-3xl h-full shadow-2xl shadow-black/50 pointer-events-auto flex flex-col overflow-hidden">
+                <!-- Header Image -->
+                <div class="relative h-48 bg-slate-800 flex-shrink-0">
+                    <template x-if="selectedFeature?.image_url">
+                        <img :src="selectedFeature.image_url" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!selectedFeature?.image_url">
+                        <div class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-600">
+                            <i class="fa-solid fa-image text-4xl"></i>
+                        </div>
+                    </template>
+                    <button @click="selectedFeature = null" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition backdrop-blur">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                    <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-900 to-transparent">
+                        <span class="inline-block px-2 py-1 rounded bg-blue-600 text-white text-xs font-bold uppercase tracking-wider mb-1" x-text="selectedFeature?.category?.name || selectedFeature?.type || 'Detail'"></span>
+                        <h2 class="text-xl font-bold text-white leading-tight" x-text="selectedFeature?.name"></h2>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 overflow-y-auto custom-scroll p-6 space-y-6">
+                    
+                    <div x-show="selectedFeature?.description">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Deskripsi</h3>
+                        <p class="text-sm text-slate-300 leading-relaxed" x-text="selectedFeature?.description"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <template x-if="selectedFeature?.area_hectares">
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider">Luas Area</p>
+                                <p class="text-lg font-bold text-white mt-1"><span x-text="selectedFeature.area_hectares"></span> ha</p>
+                            </div>
+                        </template>
+                        <template x-if="selectedFeature?.length_meters">
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider">Panjang</p>
+                                <p class="text-lg font-bold text-white mt-1"><span x-text="selectedFeature.length_meters"></span> m</p>
+                            </div>
+                        </template>
+                        <template x-if="selectedFeature?.condition">
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider">Kondisi</p>
+                                <p class="text-lg font-bold text-white mt-1" x-text="selectedFeature.condition"></p>
+                            </div>
+                        </template>
+                        <template x-if="selectedFeature?.owner">
+                            <div class="bg-white/5 rounded-xl p-3 border border-white/5">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider">Pemilik</p>
+                                <p class="text-lg font-bold text-white mt-1" x-text="selectedFeature.owner"></p>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/10">
+                        <button @click="zoomToFeature(selectedFeature)" class="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-500 transition shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            Fokus di Peta
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 
-    <!-- Alpine.js -->
+    <!-- Scripts -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         function mapExplorer() {
             return {
                 map: null,
-                markers: [],
-                boundariesLayer: null,
-                infrastructuresLayer: null,
-                landUsesLayer: null,
-                placesLayer: null,
-                showPlaces: true,
-                showBoundaries: true,
-                showInfrastructures: true,
-                showLandUses: true,
+                activeTab: 'layers',
                 searchQuery: '',
                 searchResults: [],
                 selectedFeature: null,
+                
+                // Data
+                categories: @json($categories),
+                selectedCategories: [],
+                
+                // Toggles
+                showBoundaries: true,
+                showInfrastructures: true,
+                showLandUses: true,
+
+                // Raw Data
                 allPlaces: [],
                 allBoundaries: [],
                 allInfrastructures: [],
                 allLandUses: [],
 
-                init() {
-                    const center = [-6.7289, 110.7485];
-                    this.map = L.map('map').setView(center, 14);
+                // Layers
+                markers: [],
+                boundariesLayer: null,
+                infrastructuresLayer: null,
+                landUsesLayer: null,
 
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                get visiblePlaces() {
+                    if (!this.allPlaces.length) return [];
+                    return this.allPlaces
+                        .map(f => ({
+                            ...f.properties,
+                            latitude: f.geometry.coordinates[1],
+                            longitude: f.geometry.coordinates[0]
+                        }))
+                        .filter(p => this.selectedCategories.includes(p.category.id));
+                },
+
+                init() {
+                    this.selectedCategories = this.categories.map(c => c.id);
+                    this.initMap();
+                    this.loadAllData();
+                },
+
+                initMap() {
+                    this.map = L.map('map', {
+                        zoomControl: false,
+                        attributionControl: false
+                    }).setView([-6.7289, 110.7485], 14);
+
+                    // Custom Zoom Control
+                    L.control.zoom({
+                        position: 'bottomright'
                     }).addTo(this.map);
 
-                    this.loadAllData();
+                    // Google Maps Layers
+                    const googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    });
+                    const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    });
+                    const googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    });
+                    const googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+                        maxZoom: 20,
+                        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                    });
+
+                    googleStreets.addTo(this.map);
+
+                    const baseLayers = {
+                        "Streets": googleStreets,
+                        "Hybrid": googleHybrid,
+                        "Satellite": googleSatellite,
+                        "Terrain": googleTerrain
+                    };
+
+                    L.control.layers(baseLayers, null, { position: 'bottomright' }).addTo(this.map);
                 },
 
                 async loadAllData() {
                     try {
-                        // Load Places
-                        const placesRes = await fetch('{{ route("places.geojson") }}');
-                        const placesData = await placesRes.json();
-                        this.allPlaces = placesData.features || [];
-                        this.loadPlaces();
+                        const [places, boundaries, infrastructures, landUses] = await Promise.all([
+                            fetch('{{ route("places.geojson") }}').then(r => r.json()),
+                            fetch('{{ route("boundaries.geojson") }}').then(r => r.json()),
+                            fetch('{{ route("infrastructures.geojson") }}').then(r => r.json()),
+                            fetch('{{ route("land_uses.geojson") }}').then(r => r.json())
+                        ]);
 
-                        // Load Boundaries
-                        const boundariesRes = await fetch('{{ route("boundaries.geojson") }}');
-                        const boundariesData = await boundariesRes.json();
-                        this.allBoundaries = boundariesData.features || [];
-                        this.loadBoundaries();
+                        this.allPlaces = places.features || [];
+                        this.allBoundaries = boundaries.features || [];
+                        this.allInfrastructures = infrastructures.features || [];
+                        this.allLandUses = landUses.features || [];
 
-                        // Load Infrastructures
-                        const infrastructuresRes = await fetch('{{ route("infrastructures.geojson") }}');
-                        const infrastructuresData = await infrastructuresRes.json();
-                        this.allInfrastructures = infrastructuresData.features || [];
-                        this.loadInfrastructures();
+                        this.updateLayers();
+                        this.updateMapMarkers();
 
-                        // Load Land Uses
-                        const landUsesRes = await fetch('{{ route("land_uses.geojson") }}');
-                        const landUsesData = await landUsesRes.json();
-                        this.allLandUses = landUsesData.features || [];
-                        this.loadLandUses();
-                    } catch (error) {
-                        console.error('Error loading data:', error);
+                    } catch (e) {
+                        console.error("Failed to load map data", e);
                     }
-                },
-
-                loadPlaces() {
-                    if (this.placesLayer) {
-                        this.map.removeLayer(this.placesLayer);
-                    }
-                    if (!this.showPlaces) return;
-
-                    this.placesLayer = L.layerGroup();
-                    this.allPlaces.forEach(feature => {
-                        const [lng, lat] = feature.geometry.coordinates;
-                        const marker = L.marker([lat, lng]);
-                        
-                        const props = feature.properties;
-                        const popupContent = `
-                            <div class="p-2 min-w-[200px]">
-                                ${props.image_url ? `<img src="${props.image_url}" class="w-full h-32 object-cover mb-2 rounded">` : ''}
-                                <h3 class="font-bold text-gray-900 mb-1">${props.name}</h3>
-                                <p class="text-xs text-gray-600 mb-1">${props.category?.name || ''}</p>
-                                <p class="text-xs text-gray-500">${props.description || ''}</p>
-                            </div>
-                        `;
-                        marker.bindPopup(popupContent);
-                        marker.on('click', () => {
-                            this.selectedFeature = props;
-                            this.map.setView([lat, lng], 16);
-                        });
-                        this.placesLayer.addLayer(marker);
-                    });
-                    this.placesLayer.addTo(this.map);
-                },
-
-                loadBoundaries() {
-                    if (this.boundariesLayer) {
-                        this.map.removeLayer(this.boundariesLayer);
-                    }
-                    if (!this.showBoundaries) return;
-
-                    this.boundariesLayer = L.geoJSON(this.allBoundaries, {
-                        style: {
-                            color: '#10b981',
-                            weight: 2,
-                            fillColor: '#10b981',
-                            fillOpacity: 0.2
-                        },
-                        onEachFeature: (feature, layer) => {
-                            const props = feature.properties;
-                            const popupContent = `
-                                <div class="p-2">
-                                    <h3 class="font-bold text-gray-900 mb-1">${props.name}</h3>
-                                    <p class="text-xs text-gray-600 mb-1">Tipe: ${props.type}</p>
-                                    ${props.area_hectares ? `<p class="text-xs text-gray-600">Luas: ${props.area_hectares} ha</p>` : ''}
-                                    ${props.description ? `<p class="text-xs text-gray-600 mt-1">${props.description}</p>` : ''}
-                                </div>
-                            `;
-                            layer.bindPopup(popupContent);
-                            layer.on('click', () => {
-                                this.selectedFeature = props;
-                            });
-                        }
-                    });
-                    this.boundariesLayer.addTo(this.map);
-                },
-
-                loadInfrastructures() {
-                    if (this.infrastructuresLayer) {
-                        this.map.removeLayer(this.infrastructuresLayer);
-                    }
-                    if (!this.showInfrastructures) return;
-
-                    this.infrastructuresLayer = L.geoJSON(this.allInfrastructures, {
-                        style: (feature) => {
-                            const type = feature.properties.type;
-                            const color = type === 'river' ? '#3b82f6' : 
-                                         type === 'road' ? '#6b7280' : 
-                                         type === 'irrigation' ? '#06b6d4' : '#8b5cf6';
-                            return {
-                                color: color,
-                                weight: type === 'road' ? 4 : 3,
-                                opacity: 0.8
-                            };
-                        },
-                        onEachFeature: (feature, layer) => {
-                            const props = feature.properties;
-                            const popupContent = `
-                                <div class="p-2">
-                                    <h3 class="font-bold text-gray-900 mb-1">${props.name}</h3>
-                                    <p class="text-xs text-gray-600 mb-1">Tipe: ${props.type}</p>
-                                    ${props.length_meters ? `<p class="text-xs text-gray-600">Panjang: ${props.length_meters} m</p>` : ''}
-                                    ${props.description ? `<p class="text-xs text-gray-600 mt-1">${props.description}</p>` : ''}
-                                </div>
-                            `;
-                            layer.bindPopup(popupContent);
-                            layer.on('click', () => {
-                                this.selectedFeature = props;
-                            });
-                        }
-                    });
-                    this.infrastructuresLayer.addTo(this.map);
-                },
-
-                loadLandUses() {
-                    if (this.landUsesLayer) {
-                        this.map.removeLayer(this.landUsesLayer);
-                    }
-                    if (!this.showLandUses) return;
-
-                    this.landUsesLayer = L.geoJSON(this.allLandUses, {
-                        style: (feature) => {
-                            const type = feature.properties.type;
-                            const color = type === 'rice_field' ? '#fbbf24' : 
-                                         type === 'plantation' ? '#84cc16' : 
-                                         type === 'forest' ? '#059669' : '#f59e0b';
-                            return {
-                                color: color,
-                                weight: 2,
-                                fillColor: color,
-                                fillOpacity: 0.3
-                            };
-                        },
-                        onEachFeature: (feature, layer) => {
-                            const props = feature.properties;
-                            const popupContent = `
-                                <div class="p-2">
-                                    <h3 class="font-bold text-gray-900 mb-1">${props.name}</h3>
-                                    <p class="text-xs text-gray-600 mb-1">Tipe: ${props.type}</p>
-                                    ${props.area_hectares ? `<p class="text-xs text-gray-600">Luas: ${props.area_hectares} ha</p>` : ''}
-                                    ${props.description ? `<p class="text-xs text-gray-600 mt-1">${props.description}</p>` : ''}
-                                </div>
-                            `;
-                            layer.bindPopup(popupContent);
-                            layer.on('click', () => {
-                                this.selectedFeature = props;
-                            });
-                        }
-                    });
-                    this.landUsesLayer.addTo(this.map);
                 },
 
                 updateLayers() {
-                    this.loadPlaces();
-                    this.loadBoundaries();
-                    this.loadInfrastructures();
-                    this.loadLandUses();
+                    // Boundaries
+                    if (this.boundariesLayer) this.map.removeLayer(this.boundariesLayer);
+                    if (this.showBoundaries && this.allBoundaries.length) {
+                        this.boundariesLayer = L.geoJSON(this.allBoundaries, {
+                            style: { color: '#10b981', weight: 2, fillOpacity: 0.1 },
+                            onEachFeature: (f, l) => this.bindFeaturePopup(f, l)
+                        }).addTo(this.map);
+                    }
+
+                    // Infrastructures
+                    if (this.infrastructuresLayer) this.map.removeLayer(this.infrastructuresLayer);
+                    if (this.showInfrastructures && this.allInfrastructures.length) {
+                        this.infrastructuresLayer = L.geoJSON(this.allInfrastructures, {
+                            style: (f) => {
+                                const type = f.properties.type;
+                                const color = type === 'river' ? '#3b82f6' : 
+                                             type === 'road' ? '#94a3b8' : 
+                                             type === 'irrigation' ? '#06b6d4' : '#8b5cf6';
+                                return { color: color, weight: type === 'road' ? 4 : 3, opacity: 0.9 };
+                            },
+                            onEachFeature: (f, l) => this.bindFeaturePopup(f, l)
+                        }).addTo(this.map);
+                    }
+
+                    // Land Uses
+                    if (this.landUsesLayer) this.map.removeLayer(this.landUsesLayer);
+                    if (this.showLandUses && this.allLandUses.length) {
+                        this.landUsesLayer = L.geoJSON(this.allLandUses, {
+                            style: (f) => {
+                                const type = f.properties.type;
+                                const color = type === 'rice_field' ? '#fbbf24' : 
+                                             type === 'plantation' ? '#84cc16' : 
+                                             type === 'forest' ? '#059669' : '#f59e0b';
+                                return { color: color, weight: 1, fillOpacity: 0.4, fillColor: color };
+                            },
+                            onEachFeature: (f, l) => this.bindFeaturePopup(f, l)
+                        }).addTo(this.map);
+                    }
+                },
+
+                updateMapMarkers() {
+                    this.markers.forEach(m => this.map.removeLayer(m));
+                    this.markers = [];
+
+                    this.allPlaces.forEach(feature => {
+                        const props = feature.properties;
+                        if (!this.selectedCategories.includes(props.category.id)) return;
+
+                        const [lng, lat] = feature.geometry.coordinates;
+                        
+                        const iconHtml = `
+                            <div class="w-8 h-8 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white text-xs" style="background-color: ${props.category.color}">
+                                <i class="${props.category.icon_class || 'fa-solid fa-map-marker-alt'}"></i>
+                            </div>
+                        `;
+                        
+                        const icon = L.divIcon({
+                            html: iconHtml,
+                            className: 'custom-marker',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        });
+
+                        const marker = L.marker([lat, lng], { icon: icon });
+                        
+                        marker.on('click', () => {
+                            this.selectedFeature = {
+                                ...props,
+                                image_url: props.image_url ? props.image_url : null
+                            };
+                        });
+
+                        marker.addTo(this.map);
+                        this.markers.push(marker);
+                    });
+                },
+
+                bindFeaturePopup(feature, layer) {
+                    layer.on('click', () => {
+                        this.selectedFeature = feature.properties;
+                        L.DomEvent.stop(event); // Prevent map click
+                    });
                 },
 
                 performSearch() {
-                    if (!this.searchQuery.trim()) {
+                    if (this.searchQuery.length < 2) {
                         this.searchResults = [];
                         return;
                     }
-
-                    const query = this.searchQuery.toLowerCase();
-                    this.searchResults = [
-                        ...this.allPlaces.filter(f => 
-                            f.properties.name?.toLowerCase().includes(query) ||
-                            f.properties.description?.toLowerCase().includes(query) ||
-                            f.properties.category?.name?.toLowerCase().includes(query)
-                        ).map(f => f.properties),
-                        ...this.allBoundaries.filter(f => 
-                            f.properties.name?.toLowerCase().includes(query) ||
-                            f.properties.description?.toLowerCase().includes(query)
-                        ).map(f => f.properties),
-                        ...this.allInfrastructures.filter(f => 
-                            f.properties.name?.toLowerCase().includes(query) ||
-                            f.properties.description?.toLowerCase().includes(query)
-                        ).map(f => f.properties),
-                        ...this.allLandUses.filter(f => 
-                            f.properties.name?.toLowerCase().includes(query) ||
-                            f.properties.description?.toLowerCase().includes(query)
-                        ).map(f => f.properties)
-                    ];
+                    const q = this.searchQuery.toLowerCase();
+                    
+                    const places = this.allPlaces.filter(f => f.properties.name.toLowerCase().includes(q)).map(f => ({...f.properties, type: 'Lokasi', _geo: f}));
+                    const bounds = this.allBoundaries.filter(f => f.properties.name.toLowerCase().includes(q)).map(f => ({...f.properties, type: 'Wilayah', _geo: f}));
+                    const infras = this.allInfrastructures.filter(f => f.properties.name.toLowerCase().includes(q)).map(f => ({...f.properties, type: 'Infrastruktur', _geo: f}));
+                    
+                    this.searchResults = [...places, ...bounds, ...infras].slice(0, 5);
                 },
 
-                selectFeature(feature) {
-                    this.selectedFeature = feature;
-                    // Find and zoom to feature
-                    const allFeatures = [
-                        ...this.allPlaces,
-                        ...this.allBoundaries,
-                        ...this.allInfrastructures,
-                        ...this.allLandUses
-                    ];
-                    const found = allFeatures.find(f => f.properties.id === feature.id);
-                    if (found) {
-                        if (found.geometry.type === 'Point') {
-                            const [lng, lat] = found.geometry.coordinates;
-                            this.map.setView([lat, lng], 16);
-                        } else {
-                            const bounds = L.geoJSON(found).getBounds();
-                            this.map.fitBounds(bounds);
-                        }
-                    }
+                selectFeature(result) {
+                    this.selectedFeature = result;
+                    this.searchQuery = '';
+                    this.searchResults = [];
+                    this.zoomToFeature(result);
                 },
 
                 selectPlace(place) {
                     this.selectedFeature = {
-                        id: place.id,
-                        name: place.name,
-                        description: place.description,
-                        category: {
-                            name: place.category.name,
-                            color: place.category.color
-                        },
+                        ...place,
                         image_url: place.image_path ? '{{ url("/") }}/' + place.image_path : null
                     };
-                    this.map.setView([place.latitude, place.longitude], 16);
+                    this.zoomToFeature({
+                        latitude: place.latitude,
+                        longitude: place.longitude,
+                        _geo: { geometry: { type: 'Point', coordinates: [place.longitude, place.latitude] } }
+                    });
+                },
+
+                zoomToFeature(feature) {
+                    // Handle both raw feature objects and processed result objects
+                    const geo = feature._geo || (feature.geometry ? feature : null);
+                    
+                    if (geo) {
+                        if (geo.geometry.type === 'Point') {
+                            const [lng, lat] = geo.geometry.coordinates;
+                            this.map.setView([lat, lng], 18, { animate: true, duration: 1.5 });
+                        } else {
+                            const bounds = L.geoJSON(geo).getBounds();
+                            this.map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 1.5 });
+                        }
+                    } else if (feature.latitude && feature.longitude) {
+                         this.map.setView([feature.latitude, feature.longitude], 18, { animate: true, duration: 1.5 });
+                    }
+                },
+
+                resetView() {
+                    this.map.setView([-6.7289, 110.7485], 14, { animate: true, duration: 1 });
+                    this.selectedFeature = null;
                 }
             }
         }
     </script>
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
 </body>
 </html>
-
