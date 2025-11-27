@@ -283,13 +283,6 @@
                         lat: Number(latlng.lat).toFixed(6),
                         lng: Number(latlng.lng).toFixed(6)
                     };
-                } else if (layer instanceof L.Polyline) {
-                    const latlngs = layer.getLatLngs();
-                    const coordinates = latlngs.map(ll => [ll.lng, ll.lat]);
-                    geometry = {
-                        type: 'LineString',
-                        coordinates: coordinates
-                    };
                 } else if (layer instanceof L.Polygon) {
                     const latlngs = layer.getLatLngs()[0]; // First ring
                     const coordinates = latlngs.map(ll => [ll.lng, ll.lat]);
@@ -298,6 +291,13 @@
                     geometry = {
                         type: 'Polygon',
                         coordinates: [coordinates]
+                    };
+                } else if (layer instanceof L.Polyline) {
+                    const latlngs = layer.getLatLngs();
+                    const coordinates = latlngs.map(ll => [ll.lng, ll.lat]);
+                    geometry = {
+                        type: 'LineString',
+                        coordinates: coordinates
                     };
                 }
 
