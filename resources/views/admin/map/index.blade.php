@@ -233,6 +233,8 @@
                                     <i class="fa-solid fa-trash mr-1"></i> Hapus
                                 </button>
                             </div>
+                            
+
                             <div class="mt-3">
                                 <button 
                                     @click="toggleMeasure()"
@@ -413,6 +415,7 @@
                         this.$nextTick(() => {
                             this.initMap();
                             this.loadAllLayers();
+                            this.initKeyboardShortcuts();
                         });
                     },
 
@@ -689,6 +692,9 @@
                         }
                     },
 
+                    redoStack: [],
+                    isRedoing: false,
+
                     startDrawing(type) {
                         // Disable previous drawing if any
                         if (this.currentDrawHandler) {
@@ -696,21 +702,77 @@
                         }
                         
                         this.drawingMode = type;
+                        this.redoStack = [];
                         
                         if (type === 'point') {
                             // Point drawing handled by map click - already set up in initMapEvents
                             this.map.getContainer().style.cursor = 'crosshair';
-                        } else if (type === 'line') {
-                            this.currentDrawHandler = new L.Draw.Polyline(this.map, {
-                                shapeOptions: { color: '#3388ff', weight: 4 }
-                            });
-                            this.currentDrawHandler.enable();
-                        } else if (type === 'polygon') {
-                            this.currentDrawHandler = new L.Draw.Polygon(this.map, {
-                                shapeOptions: { color: '#3388ff', fillColor: '#3388ff', fillOpacity: 0.2 }
-                            });
+                        } else if (type === 'line' || type === 'polygon') {
+                            const options = type === 'line' 
+                                ? { shapeOptions: { color: '#3388ff', weight: 4 } }
+                                : { shapeOptions: { color: '#3388ff', fillColor: '#3388ff', fillOpacity: 0.2 } };
+                                
+                            const HandlerClass = type === 'line' ? L.Draw.Polyline : L.Draw.Polygon;
+                            this.currentDrawHandler = new HandlerClass(this.map, options);
+                            
+                            // Monkey-patch deleteLastVertex to save to redo stack
+                            const originalDelete = this.currentDrawHandler.deleteLastVertex;
+                            this.currentDrawHandler.deleteLastVertex = () => {
+                                const markers = this.currentDrawHandler._markers;
+                                if (markers && markers.length > 0) {
+                                    const lastMarker = markers[markers.length - 1];
+                                    this.redoStack.push(lastMarker.getLatLng());
+                                }
+                                originalDelete.call(this.currentDrawHandler);
+                            };
+
+                            // Monkey-patch addVertex to clear redo stack (unless redoing)
+                            const originalAddVertex = this.currentDrawHandler.addVertex;
+                            this.currentDrawHandler.addVertex = (latlng) => {
+                                if (!this.isRedoing) {
+                                    this.redoStack = [];
+                                }
+                                originalAddVertex.call(this.currentDrawHandler, latlng);
+                            };
+
                             this.currentDrawHandler.enable();
                         }
+                    },
+
+                    redoPoint() {
+                        console.log('Redo triggered');
+                        if (this.currentDrawHandler && this.redoStack.length > 0) {
+                            const latlng = this.redoStack.pop();
+                            this.isRedoing = true;
+                            this.currentDrawHandler.addVertex(latlng);
+                            this.isRedoing = false;
+                            console.log('Redo successful', latlng);
+                        } else {
+                            console.log('Redo failed: stack empty or no handler');
+                        }
+                    },
+
+                    undoPoint() {
+                        console.log('Undo triggered');
+                        if (this.currentDrawHandler && this.currentDrawHandler.deleteLastVertex) {
+                            this.currentDrawHandler.deleteLastVertex();
+                            console.log('Undo successful');
+                        } else {
+                            console.log('Undo failed: no handler or deleteLastVertex method');
+                        }
+                    },
+
+                    initKeyboardShortcuts() {
+                        document.addEventListener('keydown', (e) => {
+                            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                                e.preventDefault();
+                                this.undoPoint();
+                            }
+                            if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+                                e.preventDefault();
+                                this.redoPoint();
+                            }
+                        });
                     },
 
                     addPoint(latlng) {
