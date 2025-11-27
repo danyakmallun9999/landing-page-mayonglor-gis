@@ -338,6 +338,22 @@
                 if (geometry) {
                     this.geometryJson = JSON.stringify(geometry);
                     this.hasGeometry = true;
+
+                    // Calculate area if it's a polygon
+                    if (geometry.type === 'Polygon') {
+                        this.calculateArea(layer);
+                    }
+                }
+            },
+
+            calculateArea(layer) {
+                if (layer instanceof L.Polygon) {
+                    const latlngs = layer.getLatLngs()[0];
+                    const areaSqMeters = L.GeometryUtil.geodesicArea(latlngs);
+                    const areaHectares = (areaSqMeters / 10000).toFixed(4);
+                    
+                    // Dispatch event for parent components
+                    this.$dispatch('area-calculated', areaHectares);
                 }
             },
 

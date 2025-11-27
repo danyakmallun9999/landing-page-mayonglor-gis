@@ -11,7 +11,7 @@
     <div class="py-10">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-2xl p-6">
-                <form action="{{ route('admin.land-uses.store') }}" method="POST" class="space-y-6">
+                <form x-data="{ area: '' }" @area-calculated.window="area = $event.detail; $refs.areaInput.value = area" action="{{ route('admin.land-uses.store') }}" method="POST" class="space-y-6">
                     @csrf
 
                     <div class="space-y-6">
@@ -37,7 +37,7 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Luas (Hektar)</label>
-                                <input type="number" name="area_hectares" value="{{ old('area_hectares', $landUse->area_hectares) }}" step="0.0001" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <input x-ref="areaInput" type="number" name="area_hectares" value="{{ old('area_hectares', $landUse->area_hectares) }}" step="0.0001" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <x-input-error :messages="$errors->get('area_hectares')" class="mt-2" />
                             </div>
 
