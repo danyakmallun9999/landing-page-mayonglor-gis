@@ -377,6 +377,7 @@
                 searchQuery: '',
                 searchResults: [],
                 selectedFeature: null,
+                initialCenterSet: false,
                 
                 // Data
                 categories: @json($categories),
@@ -487,6 +488,12 @@
                             style: { color: '#10b981', weight: 2, fillOpacity: 0.1 },
                             onEachFeature: (f, l) => this.bindFeaturePopup(f, l)
                         }).addTo(this.map);
+
+                        // Fit bounds on initial load
+                        if (!this.initialCenterSet) {
+                            this.map.fitBounds(this.boundariesLayer.getBounds(), { padding: [50, 50] });
+                            this.initialCenterSet = true;
+                        }
                     }
 
                     // Infrastructures
