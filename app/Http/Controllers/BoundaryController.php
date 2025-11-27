@@ -102,9 +102,13 @@ class BoundaryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Boundary $boundary): RedirectResponse
+    public function destroy(Boundary $boundary): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $boundary->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Batas wilayah berhasil dihapus.']);
+        }
 
         return redirect()
             ->route('admin.boundaries.index')

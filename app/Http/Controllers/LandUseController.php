@@ -104,9 +104,13 @@ class LandUseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(LandUse $landUse): RedirectResponse
+    public function destroy(LandUse $landUse): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $landUse->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Penggunaan lahan berhasil dihapus.']);
+        }
 
         return redirect()
             ->route('admin.land_uses.index')

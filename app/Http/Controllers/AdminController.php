@@ -117,13 +117,17 @@ class AdminController extends Controller
             ->with('status', 'Lokasi berhasil diperbarui.');
     }
 
-    public function destroy(Place $place): RedirectResponse
+    public function destroy(Place $place): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         if ($place->image_path) {
             $this->deleteImage($place->image_path);
         }
 
         $place->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Lokasi berhasil dihapus.']);
+        }
 
         return redirect()
             ->route('admin.places.index')

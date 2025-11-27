@@ -112,9 +112,13 @@ class InfrastructureController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Infrastructure $infrastructure): RedirectResponse
+    public function destroy(Infrastructure $infrastructure): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $infrastructure->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Infrastruktur berhasil dihapus.']);
+        }
 
         return redirect()
             ->route('admin.infrastructures.index')
