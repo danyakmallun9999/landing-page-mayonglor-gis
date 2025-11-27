@@ -41,7 +41,8 @@ class DatabaseSeeder extends Seeder
             'description' => 'Sekolah Dasar Negeri unggulan di desa Mayong Lor.',
             'latitude' => -6.7289,
             'longitude' => 110.7485,
-            'image' => 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=80'
+            'longitude' => 110.7485,
+            'image_path' => 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=80'
         ]);
 
         \App\Models\Place::create([
@@ -50,7 +51,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Masjid besar pusat kegiatan keagamaan warga.',
             'latitude' => -6.7300,
             'longitude' => 110.7500,
-            'image' => 'https://images.unsplash.com/photo-1564121211835-e88c852648ab?auto=format&fit=crop&w=800&q=80'
+            'image_path' => 'https://images.unsplash.com/photo-1564121211835-e88c852648ab?auto=format&fit=crop&w=800&q=80'
         ]);
         
         \App\Models\Place::create([
@@ -59,7 +60,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Pusat pelayanan administrasi desa.',
             'latitude' => -6.7280,
             'longitude' => 110.7480,
-            'image' => 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80'
+            'image_path' => 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80'
         ]);
     }
 }

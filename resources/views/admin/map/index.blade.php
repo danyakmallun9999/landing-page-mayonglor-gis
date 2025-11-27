@@ -234,6 +234,25 @@
                                 </button>
                             </div>
                             
+                            <!-- GeoJSON Upload -->
+                            <div class="mt-3 border-t border-gray-100 pt-3">
+                                <input type="file" x-ref="geojsonInput" accept=".geojson,.json" class="hidden" @change="handleFileUpload($event)">
+                                <button 
+                                    @click="$refs.geojsonInput.click()"
+                                    class="w-full px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition flex items-center justify-center"
+                                >
+                                    <i class="fa-solid fa-file-import mr-2"></i> Upload GeoJSON (QGIS)
+                                </button>
+                                
+                                <button 
+                                    x-show="uploadedGeoJSON"
+                                    @click="saveUploadedFeature()"
+                                    class="w-full mt-2 px-3 py-2 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition flex items-center justify-center"
+                                    x-transition
+                                >
+                                    <i class="fa-solid fa-save mr-2"></i> Simpan Fitur
+                                </button>
+                            </div>
 
                             <div class="mt-3">
                                 <button 
@@ -250,6 +269,32 @@
                     <!-- Map Area -->
                     <div class="flex-1 relative">
                         <div id="interactiveMap" class="w-full h-full"></div>
+                        
+                        <!-- Floating Undo/Redo Controls -->
+                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] flex space-x-2" 
+                             x-show="drawingMode === 'line' || drawingMode === 'polygon'" 
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform -translate-y-4"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 transform translate-y-0"
+                             x-transition:leave-end="opacity-0 transform -translate-y-4">
+                            <button 
+                                @click="undoPoint()"
+                                class="bg-white text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-md border border-gray-200 text-sm font-semibold flex items-center transition"
+                                title="Undo (Ctrl+Z)"
+                            >
+                                <i class="fa-solid fa-undo mr-2"></i> Undo
+                            </button>
+                            <button 
+                                @click="redoPoint()"
+                                class="bg-white text-gray-700 hover:text-gray-900 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-md border border-gray-200 text-sm font-semibold flex items-center transition"
+                                title="Redo (Ctrl+Y)"
+                            >
+                                <i class="fa-solid fa-redo mr-2"></i> Redo
+                            </button>
+                        </div>
                         
                         <!-- Map Controls Overlay -->
                         <div class="absolute top-4 right-4 z-[1000] space-y-2">
@@ -390,7 +435,10 @@
                     measureMode: false,
                     selectedFeature: null,
                     showDeleteModal: false,
+                    selectedFeature: null,
+                    showDeleteModal: false,
                     featureToDelete: null,
+                    uploadedGeoJSON: null,
                     
                     // Data
                     boundaries: @json($boundaries ?? []),
@@ -811,6 +859,75 @@
                     toggleMeasure() {
                         this.measureMode = !this.measureMode;
                         // TODO: Implement measurement tool
+                    },
+
+                    handleFileUpload(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const geojson = JSON.parse(e.target.result);
+                                const layer = L.geoJSON(geojson);
+                                
+                                // Store the first feature's geometry for saving
+                                if (geojson.features && geojson.features.length > 0) {
+                                    this.uploadedGeoJSON = geojson.features[0].geometry;
+                                } else if (geojson.type === 'Feature') {
+                                    this.uploadedGeoJSON = geojson.geometry;
+                                } else if (geojson.type === 'FeatureCollection' && geojson.features.length > 0) {
+                                     this.uploadedGeoJSON = geojson.features[0].geometry;
+                                } else {
+                                    // Direct geometry object
+                                    this.uploadedGeoJSON = geojson; 
+                                }
+
+                                layer.eachLayer((l) => {
+                                    this.drawnItems.addLayer(l);
+                                });
+                                
+                                // Zoom to uploaded features
+                                if (layer.getBounds().isValid()) {
+                                    this.map.fitBounds(layer.getBounds());
+                                }
+                                
+                                // Reset input
+                                event.target.value = '';
+                                
+                                alert('File GeoJSON berhasil diupload! Klik "Simpan Fitur" untuk menyimpan.');
+                            } catch (error) {
+                                console.error('Error parsing GeoJSON:', error);
+                                alert('Gagal membaca file GeoJSON. Pastikan format file benar.');
+                                this.uploadedGeoJSON = null;
+                            }
+                        };
+                        reader.readAsText(file);
+                    },
+
+                    saveUploadedFeature() {
+                        if (!this.uploadedGeoJSON) return;
+
+                        const geometry = this.uploadedGeoJSON;
+                        const geometryJson = JSON.stringify(geometry);
+                        
+                        // Determine create URL based on geometry type
+                        let createUrl = '/admin/';
+                        
+                        if (geometry.type === 'Polygon' || geometry.type === 'MultiPolygon') {
+                            createUrl += 'boundaries/create';
+                        } else if (geometry.type === 'LineString' || geometry.type === 'MultiLineString') {
+                            createUrl += 'infrastructures/create';
+                        } else if (geometry.type === 'Point') {
+                            createUrl += 'places/create';
+                        } else {
+                            // Default fallback
+                            createUrl += 'boundaries/create';
+                        }
+                        
+                        // Store geometry in sessionStorage and redirect
+                        sessionStorage.setItem('newFeatureGeometry', geometryJson);
+                        window.location.href = createUrl;
                     },
 
                     focusOnFeature(item, type) {
