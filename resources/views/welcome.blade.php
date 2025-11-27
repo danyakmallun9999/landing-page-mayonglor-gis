@@ -586,7 +586,7 @@
                     if (!this.showBoundaries) return;
 
                     // Create new layer group
-                    this.boundariesLayer = L.layerGroup();
+                    this.boundariesLayer = L.featureGroup();
                     
                     features.forEach(feature => {
                         const layer = L.geoJSON(feature, {
@@ -614,6 +614,11 @@
                     });
                     
                     this.boundariesLayer.addTo(this.map);
+
+                    // Fit bounds if boundaries exist
+                    if (this.boundaries.length > 0) {
+                        this.map.fitBounds(this.boundariesLayer.getBounds(), { padding: [50, 50] });
+                    }
                 },
 
                 loadInfrastructures(features) {
