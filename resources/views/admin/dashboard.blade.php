@@ -206,7 +206,7 @@
             <!-- Mini Map -->
             <div class="bg-white shadow-sm sm:rounded-2xl p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Peta Overview</h3>
-                <div id="miniMap" class="w-full h-64 rounded-lg border border-gray-200"></div>
+                <div id="miniMap" class="w-full h-64 rounded-lg border border-gray-200 relative z-0"></div>
             </div>
 
             <!-- Places Table -->
