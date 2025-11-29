@@ -46,6 +46,12 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('places', 'stats'));
     }
 
+    public function placesIndex(): View
+    {
+        $places = Place::with('category')->latest()->paginate(10);
+        return view('admin.places.index', compact('places'));
+    }
+
     public function create(): View
     {
         $categories = Category::orderBy('name')->get();

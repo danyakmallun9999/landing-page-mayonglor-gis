@@ -26,7 +26,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('dashboard');
     
     // Places routes
-    Route::get('/places', [AdminController::class, 'index'])->name('places.index');
+    Route::get('/places', [AdminController::class, 'placesIndex'])->name('places.index');
     Route::get('/places/create', [AdminController::class, 'create'])->name('places.create');
     Route::post('/places', [AdminController::class, 'store'])->name('places.store');
     Route::get('/places/{place}/edit', [AdminController::class, 'edit'])->name('places.edit');
