@@ -40,9 +40,13 @@
                         </header>
                     @endisset
 
-                    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    @if(isset($attributes) && $attributes->get('full-width'))
                         {{ $slot }}
-                    </div>
+                    @else
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            {{ $slot }}
+                        </div>
+                    @endif
                 </main>
             </div>
         </div>

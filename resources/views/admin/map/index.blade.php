@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout full-width="true">
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
@@ -10,10 +10,10 @@
         </div>
     </x-slot>
 
-    <div class="py-6" x-data="interactiveMap()" x-init="init()">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+    <div class="h-[calc(100vh-80px)] flex flex-col" x-data="interactiveMap()" x-init="init()">
+        <div class="w-full flex-1 flex flex-col">
             <!-- Tab Navigation -->
-            <div class="bg-white rounded-t-lg border-b border-gray-200">
+            <div class="bg-white border-b border-gray-200">
                 <nav class="flex space-x-1 px-4 overflow-x-auto" aria-label="Tabs">
                     <button 
                         @click="activeTab = 'boundary'"
@@ -54,8 +54,8 @@
             </div>
 
             <!-- Map Container with Sidebar -->
-            <div class="bg-white rounded-b-lg border border-gray-200 border-t-0">
-                <div class="flex h-[calc(100vh-200px)]">
+            <div class="flex-1 flex overflow-hidden bg-white">
+                <div class="flex w-full h-full">
                     <!-- Sidebar -->
                     <div class="w-80 border-r border-gray-200 bg-gray-50 flex flex-col">
                         <!-- Tab Content -->
@@ -439,6 +439,7 @@
                     showDeleteModal: false,
                     featureToDelete: null,
                     uploadedGeoJSON: null,
+                    uploadedProperties: null,
                     
                     // Data
                     boundaries: @json($boundaries ?? []),
@@ -871,22 +872,45 @@
                                 const geojson = JSON.parse(e.target.result);
                                 const layer = L.geoJSON(geojson);
                                 
-                                // Store the first feature's geometry for saving
-                                if (geojson.features && geojson.features.length > 0) {
-                                    this.uploadedGeoJSON = geojson.features[0].geometry;
-                                } else if (geojson.type === 'Feature') {
-                                    this.uploadedGeoJSON = geojson.geometry;
-                                } else if (geojson.type === 'FeatureCollection' && geojson.features.length > 0) {
-                                     this.uploadedGeoJSON = geojson.features[0].geometry;
-                                } else {
-                                    // Direct geometry object
-                                    this.uploadedGeoJSON = geojson; 
-                                }
+                                // Clear existing drawn items
+                                this.drawnItems.clearLayers();
+                                this.uploadedGeoJSON = null;
+                                this.uploadedProperties = null;
 
+                                const layers = [];
                                 layer.eachLayer((l) => {
+                                    // Add click handler to select this feature
+                                    l.on('click', () => {
+                                        // Reset style of all layers in drawnItems (if they are paths)
+                                        this.drawnItems.eachLayer(item => {
+                                            if (item instanceof L.Path) {
+                                                item.setStyle({ color: '#3388ff', weight: 4 });
+                                            }
+                                        });
+
+                                        // Highlight clicked layer (if path)
+                                        if (l instanceof L.Path) {
+                                            l.setStyle({ color: '#ff0000', weight: 6 });
+                                        }
+
+                                        // Store geometry and properties
+                                        this.uploadedGeoJSON = l.toGeoJSON().geometry;
+                                        this.uploadedProperties = l.feature ? l.feature.properties : null;
+                                        
+                                        alert('Fitur dipilih! Klik "Simpan Fitur" untuk melanjutkan.');
+                                    });
+
                                     this.drawnItems.addLayer(l);
+                                    layers.push(l);
                                 });
                                 
+                                // Auto-select if only one feature
+                                if (layers.length === 1) {
+                                    const l = layers[0];
+                                    this.uploadedGeoJSON = l.toGeoJSON().geometry;
+                                    this.uploadedProperties = l.feature ? l.feature.properties : null;
+                                }
+
                                 // Zoom to uploaded features
                                 if (layer.getBounds().isValid()) {
                                     this.map.fitBounds(layer.getBounds());
@@ -895,7 +919,11 @@
                                 // Reset input
                                 event.target.value = '';
                                 
-                                alert('File GeoJSON berhasil diupload! Klik "Simpan Fitur" untuk menyimpan.');
+                                if (layers.length > 1) {
+                                    alert('File GeoJSON berisi ' + layers.length + ' fitur. Silakan KLIK pada salah satu fitur di peta untuk memilihnya, lalu klik "Simpan Fitur".');
+                                } else {
+                                    alert('File GeoJSON berhasil diupload! Klik "Simpan Fitur" untuk menyimpan.');
+                                }
                             } catch (error) {
                                 console.error('Error parsing GeoJSON:', error);
                                 alert('Gagal membaca file GeoJSON. Pastikan format file benar.');
@@ -906,10 +934,14 @@
                     },
 
                     saveUploadedFeature() {
-                        if (!this.uploadedGeoJSON) return;
+                        if (!this.uploadedGeoJSON) {
+                            alert('Silakan pilih fitur di peta terlebih dahulu!');
+                            return;
+                        }
 
                         const geometry = this.uploadedGeoJSON;
                         const geometryJson = JSON.stringify(geometry);
+                        const propertiesJson = this.uploadedProperties ? JSON.stringify(this.uploadedProperties) : null;
                         
                         // Determine create URL based on geometry type
                         let createUrl = '/admin/';
@@ -925,8 +957,11 @@
                             createUrl += 'boundaries/create';
                         }
                         
-                        // Store geometry in sessionStorage and redirect
+                        // Store geometry and properties in sessionStorage and redirect
                         sessionStorage.setItem('newFeatureGeometry', geometryJson);
+                        if (propertiesJson) {
+                            sessionStorage.setItem('newFeatureProperties', propertiesJson);
+                        }
                         window.location.href = createUrl;
                     },
 
@@ -1093,5 +1128,6 @@
             }
         </script>
     @endPushOnce
+    </div>
 </x-app-layout>
 
