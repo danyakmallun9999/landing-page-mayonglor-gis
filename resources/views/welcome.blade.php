@@ -55,7 +55,7 @@
                         <i class="fa-solid fa-leaf text-lg"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-green-300">Desa Mayong Lor</p>
+                        <p class="text-xs font-bold uppercase tracking-wider text-blue-300">Desa Mayong Lor</p>
                         <p class="text-lg font-bold text-white leading-none">GIS Portal</p>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                     <a href="{{ route('login') }}" class="text-sm font-semibold text-white/90 hover:text-white transition">
                         Masuk Admin
                     </a>
-                    <a href="{{ route('explore.map') }}" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-slate-900 transition-all bg-white rounded-full hover:bg-green-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent">
+                    <a href="{{ route('explore.map') }}" class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-slate-900 transition-all bg-white rounded-full hover:bg-blue-50 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent">
                         Jelajahi Peta
                         <i class="fa-solid fa-arrow-right ml-2"></i>
                     </a>
@@ -95,14 +95,14 @@
             
             <!-- Badge -->
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white text-xs sm:text-sm font-medium tracking-wide mb-6 sm:mb-8 animate-fade-in-up">
-                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                 Sistem Informasi Geografis Desa Cerdas
             </div>
 
             <!-- Main Title -->
             <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-tight mb-4 sm:mb-6 drop-shadow-lg">
                 Jelajahi Potensi <br class="hidden sm:block">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-200">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-200">
                     Desa Mayong Lor
                 </span>
             </h1>
@@ -114,7 +114,7 @@
             <!-- Search Bar -->
             <div class="mt-8 sm:mt-12 max-w-3xl mx-auto" x-data="{ query: '' }">
                 <div class="relative group">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative flex flex-col sm:flex-row items-center bg-white rounded-3xl sm:rounded-full p-2 shadow-2xl gap-2 sm:gap-0">
                         <div class="flex items-center w-full sm:flex-1">
                             <div class="flex-shrink-0 pl-4 pr-2 text-slate-400">
@@ -127,7 +127,7 @@
                                    placeholder="Cari lokasi...">
                         </div>
                         <button @click="window.location.href = '{{ route('explore.map') }}?q=' + query" 
-                                class="w-full sm:w-auto flex-shrink-0 bg-green-600 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:bg-green-700 transition shadow-lg hover:shadow-green-600/30 text-sm sm:text-base">
+                                class="w-full sm:w-auto flex-shrink-0 bg-blue-600 text-white px-6 py-2.5 sm:px-8 sm:py-3 rounded-full font-bold hover:bg-blue-700 transition shadow-lg hover:shadow-blue-600/30 text-sm sm:text-base">
                             Cari
                         </button>
                     </div>
@@ -136,11 +136,11 @@
                 <!-- Quick Tags -->
                 <div class="mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-white/80">
                     <span>Pencarian Populer:</span>
-                    <a href="{{ route('explore.map') }}?q=Balai Desa" class="hover:text-white hover:underline decoration-green-400 underline-offset-4 transition">Balai Desa</a>
+                    <a href="{{ route('explore.map') }}?q=Balai Desa" class="hover:text-white hover:underline decoration-blue-400 underline-offset-4 transition">Balai Desa</a>
                     <span class="text-white/30">•</span>
-                    <a href="{{ route('explore.map') }}?q=Masjid" class="hover:text-white hover:underline decoration-green-400 underline-offset-4 transition">Masjid</a>
+                    <a href="{{ route('explore.map') }}?q=Masjid" class="hover:text-white hover:underline decoration-blue-400 underline-offset-4 transition">Masjid</a>
                     <span class="text-white/30">•</span>
-                    <a href="{{ route('explore.map') }}?q=Sekolah" class="hover:text-white hover:underline decoration-green-400 underline-offset-4 transition">Sekolah</a>
+                    <a href="{{ route('explore.map') }}?q=Sekolah" class="hover:text-white hover:underline decoration-blue-400 underline-offset-4 transition">Sekolah</a>
                 </div>
             </div>
 
@@ -148,19 +148,19 @@
             <div class="mt-12 sm:mt-20 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
                 <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 text-center hover:bg-white/20 transition cursor-default">
                     <p class="text-2xl sm:text-3xl font-bold text-white">{{ $totalPlaces }}+</p>
-                    <p class="text-[10px] sm:text-xs text-green-200 uppercase tracking-wider mt-1">Lokasi</p>
+                    <p class="text-[10px] sm:text-xs text-blue-200 uppercase tracking-wider mt-1">Lokasi</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 text-center hover:bg-white/20 transition cursor-default">
                     <p class="text-2xl sm:text-3xl font-bold text-white">{{ $totalCategories }}</p>
-                    <p class="text-[10px] sm:text-xs text-green-200 uppercase tracking-wider mt-1">Kategori</p>
+                    <p class="text-[10px] sm:text-xs text-blue-200 uppercase tracking-wider mt-1">Kategori</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 text-center hover:bg-white/20 transition cursor-default">
                     <p class="text-2xl sm:text-3xl font-bold text-white">100%</p>
-                    <p class="text-[10px] sm:text-xs text-green-200 uppercase tracking-wider mt-1">Akurat</p>
+                    <p class="text-[10px] sm:text-xs text-blue-200 uppercase tracking-wider mt-1">Akurat</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-3 sm:p-4 text-center hover:bg-white/20 transition cursor-default flex flex-col justify-center items-center">
                     <p class="text-2xl sm:text-3xl font-bold text-white">24/7</p>
-                    <p class="text-[10px] sm:text-xs text-green-200 uppercase tracking-wider mt-1 leading-tight">Akses Data Online</p>
+                    <p class="text-[10px] sm:text-xs text-blue-200 uppercase tracking-wider mt-1 leading-tight">Akses Data Online</p>
                 </div>
             </div>
         </div>
@@ -175,13 +175,13 @@
     <section id="demography" class="py-16 bg-white border-b border-slate-100">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <p class="text-green-600 font-bold uppercase tracking-wider text-sm mb-3">Demografi Desa</p>
+                <p class="text-blue-600 font-bold uppercase tracking-wider text-sm mb-3">Demografi Desa</p>
                 <h2 class="text-3xl font-bold text-slate-900">Data Kependudukan Terkini</h2>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div class="bg-slate-50 rounded-2xl p-6 text-center border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-12 h-12 mx-auto bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
+                    <div class="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
                         <i class="fa-solid fa-users text-xl"></i>
                     </div>
                     <p class="text-3xl font-bold text-slate-900 mb-1">{{ number_format($population->total_population ?? 0) }}</p>
@@ -224,13 +224,13 @@
                     </div>
                     <!-- Experience Badge -->
                     <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:-right-6 bg-white p-6 rounded-[2rem] shadow-xl max-w-xs w-[90%] sm:w-auto text-center sm:text-left">
-                        <p class="text-4xl font-bold text-green-600 mb-1">24/7</p>
+                        <p class="text-4xl font-bold text-blue-600 mb-1">24/7</p>
                         <p class="text-slate-600 font-medium leading-tight">Akses data informasi publik secara online.</p>
                     </div>
                 </div>
                 
                 <div class="order-1 lg:order-2">
-                    <p class="text-green-600 font-bold uppercase tracking-wider text-sm mb-3">Tentang Kami</p>
+                    <p class="text-blue-600 font-bold uppercase tracking-wider text-sm mb-3">Tentang Kami</p>
                     <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-6">Mewujudkan Desa Cerdas Berbasis Data</h2>
                     <p class="text-slate-600 text-lg mb-6 leading-relaxed">
                         Sistem Informasi Geografis (SIG) Desa Mayong Lor hadir sebagai wujud transparansi dan modernisasi pelayanan publik. Kami memetakan setiap potensi dan aset desa untuk memudahkan perencanaan pembangunan dan akses informasi bagi warga.
@@ -238,7 +238,7 @@
                     
                     <div class="space-y-6">
                         <div class="flex gap-4">
-                            <div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
                                 <i class="fa-solid fa-layer-group text-xl"></i>
                             </div>
                             <div>
@@ -265,7 +265,7 @@
     <section id="stats" class="py-24 bg-white">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16">
-                <p class="text-green-600 font-bold uppercase tracking-wider text-sm mb-3">Statistik & Data</p>
+                <p class="text-blue-600 font-bold uppercase tracking-wider text-sm mb-3">Statistik & Data</p>
                 <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Sebaran Fasilitas Desa</h2>
                 <p class="mt-4 text-lg text-slate-600">
                     Gambaran umum jumlah fasilitas dan infrastruktur yang telah terpetakan dalam sistem kami.
@@ -288,7 +288,7 @@
                     <p class="text-lg font-bold text-slate-800 mb-2">{{ $category->name }}</p>
                     <p class="text-sm text-slate-500">Titik lokasi terverifikasi</p>
                     
-                    <a href="{{ route('explore.map', ['category' => $category->id]) }}" class="mt-6 pt-6 border-t border-slate-100 flex items-center text-sm font-semibold text-slate-400 group-hover:text-green-600 transition-colors">
+                    <a href="{{ route('explore.map', ['category' => $category->id]) }}" class="mt-6 pt-6 border-t border-slate-100 flex items-center text-sm font-semibold text-slate-400 group-hover:text-blue-600 transition-colors">
                         Lihat Detail <i class="fa-solid fa-arrow-right ml-2"></i>
                     </a>
                 </div>
@@ -302,13 +302,13 @@
     <section id="map-section" class="py-24 bg-slate-50 relative overflow-hidden" x-data="mapComponent()">
         <!-- Background Blobs -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div class="absolute top-1/4 left-0 w-[500px] h-[500px] bg-green-200/20 rounded-full blur-3xl"></div>
+            <div class="absolute top-1/4 left-0 w-[500px] h-[500px] bg-blue-200/20 rounded-full blur-3xl"></div>
             <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-3xl"></div>
         </div>
 
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-3xl mx-auto mb-12">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm border border-slate-100 text-green-700 text-sm font-bold mb-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-sm border border-slate-100 text-blue-700 text-sm font-bold mb-6">
                     <i class="fa-solid fa-satellite-dish"></i> Live GIS Data
                 </div>
                 <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Peta Digital Interaktif</h2>
@@ -327,7 +327,7 @@
                                    x-model="searchQuery" 
                                    @input="performSearch()"
                                    placeholder="Cari lokasi..."
-                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all placeholder-slate-400">
+                                   class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-slate-400">
                             <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                         </div>
                         
@@ -338,7 +338,7 @@
                             <template x-for="result in searchResults" :key="result.id">
                                 <button @click="zoomToResult(result)" 
                                         class="w-full text-left px-4 py-3 hover:bg-green-50 transition border-b border-slate-50 last:border-0 group">
-                                    <p class="font-bold text-slate-800 text-sm group-hover:text-green-700" x-text="result.name"></p>
+                                    <p class="font-bold text-slate-800 text-sm group-hover:text-blue-700" x-text="result.name"></p>
                                     <p class="text-xs text-slate-500" x-text="result.type"></p>
                                 </button>
                             </template>
@@ -350,15 +350,15 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Layer Peta</label>
                         <div class="space-y-3">
                             <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
-                                <input type="checkbox" x-model="showBoundaries" @change="updateLayers()" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                                <input type="checkbox" x-model="showBoundaries" @change="updateLayers()" class="w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
                                 <span class="ml-3 text-sm font-medium text-slate-700">Batas Wilayah</span>
                             </label>
                             <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
-                                <input type="checkbox" x-model="showInfrastructures" @change="updateLayers()" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                                <input type="checkbox" x-model="showInfrastructures" @change="updateLayers()" class="w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
                                 <span class="ml-3 text-sm font-medium text-slate-700">Jaringan Jalan & Sungai</span>
                             </label>
                             <label class="flex items-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition">
-                                <input type="checkbox" x-model="showLandUses" @change="updateLayers()" class="w-5 h-5 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                                <input type="checkbox" x-model="showLandUses" @change="updateLayers()" class="w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
                                 <span class="ml-3 text-sm font-medium text-slate-700">Penggunaan Lahan</span>
                             </label>
                         </div>
@@ -368,7 +368,7 @@
                     <div class="flex-1 flex flex-col min-h-0">
                         <div class="flex items-center justify-between mb-3">
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Filter Kategori</label>
-                            <button @click="resetFilters()" class="text-xs font-bold text-green-600 hover:text-green-700">Reset</button>
+                            <button @click="resetFilters()" class="text-xs font-bold text-blue-600 hover:text-blue-700">Reset</button>
                         </div>
                         <div class="space-y-2 flex-1 overflow-y-auto custom-scroll pr-2">
                             <template x-for="category in categories" :key="category.id">
@@ -376,7 +376,7 @@
                                     <input type="checkbox" 
                                            :value="category.id" 
                                            x-model="selectedCategories" 
-                                           class="w-4 h-4 text-green-600 rounded border-slate-300 focus:ring-green-500">
+                                           class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
                                     <span class="w-3 h-3 rounded-full ml-3" :style="`background-color: ${category.color}`"></span>
                                     <span class="ml-2 flex-1 text-sm font-medium text-slate-600 group-hover:text-slate-900" x-text="category.name"></span>
                                     <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md" x-text="category.places_count"></span>
@@ -397,7 +397,7 @@
     <!-- CTA Section -->
     <section id="contact" class="py-24 bg-white">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="relative bg-green-600 rounded-[3rem] overflow-hidden px-8 py-16 md:px-16 md:py-20 text-center">
+            <div class="relative bg-blue-600 rounded-[3rem] overflow-hidden px-8 py-16 md:px-16 md:py-20 text-center">
                 <!-- Decor -->
                 <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
                     <div class="absolute -top-24 -left-24 w-64 h-64 bg-white rounded-full blur-3xl"></div>
@@ -406,14 +406,14 @@
 
                 <div class="relative z-10">
                     <h2 class="text-3xl sm:text-4xl font-bold text-white mb-6">Butuh Informasi Lebih Lanjut?</h2>
-                    <p class="text-green-100 text-lg mb-10 max-w-2xl mx-auto">
+                    <p class="text-blue-100 text-lg mb-10 max-w-2xl mx-auto">
                         Silakan hubungi perangkat desa atau datang langsung ke Balai Desa Mayong Lor untuk pelayanan administrasi dan informasi lainnya.
                     </p>
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <a href="mailto:desa@mayonglor.id" class="w-full sm:w-auto px-8 py-4 bg-white text-green-700 font-bold rounded-full hover:bg-green-50 transition shadow-lg">
+                        <a href="mailto:desa@mayonglor.id" class="w-full sm:w-auto px-8 py-4 bg-white text-blue-700 font-bold rounded-full hover:bg-blue-50 transition shadow-lg">
                             Hubungi Kami
                         </a>
-                        <a href="https://goo.gl/maps/..." target="_blank" class="w-full sm:w-auto px-8 py-4 bg-green-700 text-white font-bold rounded-full hover:bg-green-800 transition border border-green-500">
+                        <a href="https://goo.gl/maps/..." target="_blank" class="w-full sm:w-auto px-8 py-4 bg-blue-700 text-white font-bold rounded-full hover:bg-blue-800 transition border border-blue-500">
                             Lokasi Kantor
                         </a>
                     </div>
@@ -428,7 +428,7 @@
             <div class="grid md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-green-600 text-white">
+                        <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white">
                             <i class="fa-solid fa-leaf"></i>
                         </div>
                         <span class="text-xl font-bold text-white">Desa Mayong Lor</span>
@@ -441,10 +441,10 @@
                 <div>
                     <h4 class="text-white font-bold mb-6">Navigasi</h4>
                     <ul class="space-y-3">
-                        <li><a href="#hero" class="hover:text-green-400 transition">Beranda</a></li>
-                        <li><a href="#about" class="hover:text-green-400 transition">Profil Desa</a></li>
-                        <li><a href="#stats" class="hover:text-green-400 transition">Data Statistik</a></li>
-                        <li><a href="#map-section" class="hover:text-green-400 transition">Peta Digital</a></li>
+                        <li><a href="#hero" class="hover:text-blue-400 transition">Beranda</a></li>
+                        <li><a href="#about" class="hover:text-blue-400 transition">Profil Desa</a></li>
+                        <li><a href="#stats" class="hover:text-blue-400 transition">Data Statistik</a></li>
+                        <li><a href="#map-section" class="hover:text-blue-400 transition">Peta Digital</a></li>
                     </ul>
                 </div>
 
@@ -452,11 +452,11 @@
                     <h4 class="text-white font-bold mb-6">Kontak</h4>
                     <ul class="space-y-3">
                         <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-location-dot mt-1 text-green-500"></i>
+                            <i class="fa-solid fa-location-dot mt-1 text-blue-500"></i>
                             <span>Jl. Raya Mayong - Jepara, Mayong Lor, Kec. Mayong, Kabupaten Jepara, Jawa Tengah</span>
                         </li>
                         <li class="flex items-center gap-3">
-                            <i class="fa-solid fa-envelope text-green-500"></i>
+                            <i class="fa-solid fa-envelope text-blue-500"></i>
                             <span>admin@mayonglor.desa.id</span>
                         </li>
                     </ul>
@@ -769,7 +769,7 @@
                             <div class="overflow-hidden rounded-xl">
                                 ${place.image_url ? `<img src="${place.image_url}" class="w-full h-40 object-cover">` : ''}
                                 <div class="p-4 bg-white">
-                                    <span class="text-xs font-bold uppercase tracking-wider text-green-600 mb-1 block">${place.category ? place.category.name : ''}</span>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1 block">${place.category ? place.category.name : ''}</span>
                                     <h3 class="text-lg font-bold text-slate-900 mb-2 leading-tight">${place.name}</h3>
                                     <p class="text-sm text-slate-600 mb-0 line-clamp-3">${place.description || 'Tidak ada deskripsi.'}</p>
                                 </div>
